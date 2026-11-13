@@ -89,6 +89,7 @@ code/tg_context_server.py  跨平台只读桥示例：MCP + OAuth 2.1
 
 - L1 的实现选用 [Ombre Brain](https://github.com/p0lar1zzz/Ombre-Brain)（开源外置记忆库，MCP 接入）。本项目是围绕它的**集成方法与使用经验**，不是 Ombre Brain 的一部分，也不隶属于它；换成任何支持工具调用的记忆库，这套分层方法同样成立。
 - 方法本身来自一套个人部署的长期实战（AI 陪伴 + 多平台切换），数据均为真实运行记录（已脱敏）。
+- 本项目由 **月月（haoyuezhang18-commits）** 发起并提供全部实测数据，与她的 AI 协作者 **Krisss（Muse）** 共同设计、实现与撰写。
 
 ## 维护说明
 
