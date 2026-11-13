@@ -27,6 +27,41 @@
 | **L2 窗口摘要** | 平台自带的上下文压缩 | 当前窗口的临时工作记忆 | 只活在这个窗口里，丢了不可惜 |
 | **L3 原始记录档案** | 全量会话日志 + 一个按需检索的小工具 | 原话，一字不改 | 长期保存，平时不加载 |
 
+## 架构总览
+
+下面这张图展示三层记忆如何协同工作：L1 保存归纳后的长期事实，L2 承载当前窗口的临时上下文，L3 保存原始记录并在需要时按需检索。跨平台 MCP 桥只是访问 L3 的一种方式，不负责同步或改写记忆。
+
+```mermaid
+flowchart TB
+    U["用户"]
+    A["当前平台的 AI Agent"]
+    L2["L2 · 窗口摘要<br/>当前窗口的临时上下文"]
+    L1["L1 · 归纳性长期记忆<br/>事实、偏好、决定、承诺"]
+    MCP1["记忆库 MCP 接口"]
+    L3["L3 · 原始会话档案<br/>完整日志，长期保存"]
+    CLI["本地检索工具<br/>session_history.py"]
+    BRIDGE["跨平台只读 MCP 桥<br/>OAuth 2.1 + PKCE"]
+    B["其他平台的 AI Agent"]
+
+    U <--> A
+    A <--> L2
+    A <--> MCP1
+    MCP1 <--> L1
+    A -. "需要核对细节时按需检索" .-> CLI
+    CLI --> L3
+    B -. "需要读取另一平台记录时" .-> BRIDGE
+    BRIDGE --> L3
+
+    classDef agent fill:#e8f0fe,stroke:#5277b8,color:#172b4d
+    classDef memory fill:#e9f5ec,stroke:#4b8b5a,color:#183d24
+    classDef tool fill:#fff4df,stroke:#b88735,color:#553b12
+    class A,B agent
+    class L1,L2,L3 memory
+    class MCP1,CLI,BRIDGE tool
+```
+
+**读图方式：** 日常对话主要使用 L1 和 L2；只有当摘要不足以回答问题、需要核对历史原话时，Agent 才调用 L3 检索工具。跨平台桥提供受授权的只读访问，不会把两边的会话自动合并。
+
 三层的分工逻辑：
 
 - **L1 负责"记得住"**：归纳过的结论密度最高，是 Agent 每次开工先读的东西。它必须独立于任何单个平台存在——平台会封号、会换代，记忆不能陪葬。
